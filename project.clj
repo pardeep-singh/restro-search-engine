@@ -6,11 +6,16 @@
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [compojure "1.5.1"]
-                 [ring/ring-defaults "0.2.1"]]
+                 [ring/ring-defaults "0.2.1"]
+                 [ring/ring-jetty-adapter "1.2.0"]
+                 [cheshire "5.7.0"]
+                 [com.stuartsierra/component "0.2.3"]]
   :source-paths ["src"]
   :global-vars {*warn-on-reflection* true}
   :manifest {"Project-Name" ~#(:name %)
              "Project-Version" ~#(:version %)
              "Build-Date" ~(str (java.util.Date.))}
   :profiles {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
-                                  [ring/ring-mock "0.3.0"]]}})
+                                  [ring/ring-mock "0.3.0"]]}}
+  :aot [restro-search-engine.core]
+  :main restro-search-engine.core)
