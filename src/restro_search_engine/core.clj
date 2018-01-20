@@ -30,6 +30,10 @@
             (GET "/_health" []
                  (ruh/ok (rha/get-cluster-health elasticsearch))))
 
+   (context "/restaurants" []
+            (GET "/:id" [id]
+                 (ruh/ok (rha/get-restaurant-record elasticsearch id))))
+
    (route/not-found "Not Found")))
 
 
