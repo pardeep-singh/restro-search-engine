@@ -7,7 +7,8 @@
              [params :refer [wrap-params]]]
             [com.stuartsierra.component :as csc]
             [restro-search-engine.components :as rc]
-            [clojurewerkz.elastisch.rest :as cer]))
+            [clojurewerkz.elastisch.rest :as cer]
+            [clojure.tools.logging :as ctl]))
 
 
 (defonce ^{:doc "Server system representing HTTP server."}
@@ -17,7 +18,6 @@
 (defn app-routes
   "Returns the APP routes and injects the dependency required by routes."
   [elasticsearch]
-  (clojure.pprint/pprint elasticsearch)
   (cc/routes
    (GET "/ping" [] "pong")
 
@@ -26,7 +26,7 @@
                                      (cer/cluster-health-url (:es-conn elasticsearch)
                                                              nil))
                             str)))
-   
+
    (route/not-found "Not Found")))
 
 
@@ -35,7 +35,7 @@
   [elasticsearch]
   (-> (app-routes elasticsearch)
       wrap-keyword-params
-      wrap-params)) 
+      wrap-params))
 
 
 (defn start-system
@@ -67,7 +67,7 @@
     (start-system system)
     (.addShutdownHook (Runtime/getRuntime)
                       (Thread. (fn []
-                                 (println "Running Shutdown Hook")
+                                 (ctl/info "Running Shutdown Hook")
                                  (stop-system server-system)
                                  (shutdown-agents)
-                                 (println "Done with shutdown hook"))))))
+                                 (ctl/info "Done with shutdown hook"))))))

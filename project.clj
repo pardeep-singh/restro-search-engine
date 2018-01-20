@@ -11,7 +11,8 @@
                  [cheshire "5.7.0"]
                  [com.stuartsierra/component "0.2.3"]
                  [clojurewerkz/elastisch "3.0.0"]
-                 [clj-http "3.7.0"]]
+                 [clj-http "3.7.0"]
+                 [org.clojure/tools.logging "0.4.0"]]
   :source-paths ["src"]
   :global-vars {*warn-on-reflection* true}
   :manifest {"Project-Name" ~#(:name %)
