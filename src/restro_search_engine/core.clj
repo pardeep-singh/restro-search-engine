@@ -8,7 +8,8 @@
             [com.stuartsierra.component :as csc]
             [restro-search-engine.components :as rc]
             [clojurewerkz.elastisch.rest :as cer]
-            [clojure.tools.logging :as ctl]))
+            [clojure.tools.logging :as ctl]
+            [restro-search-engine.util.http :as ruh]))
 
 
 (defonce ^{:doc "Server system representing HTTP server."}
@@ -19,13 +20,12 @@
   "Returns the APP routes and injects the dependency required by routes."
   [elasticsearch]
   (cc/routes
-   (GET "/ping" [] "pong")
+   (GET "/ping" [] (ruh/ok {:ping "PONG"}))
 
    (context "/cluster" []
-            (GET "/" [] (-> (cer/get (:es-conn elasticsearch)
-                                     (cer/cluster-health-url (:es-conn elasticsearch)
-                                                             nil))
-                            str)))
+            (GET "/" [] (ruh/ok (cer/get (:es-conn elasticsearch)
+                                         (cer/cluster-health-url (:es-conn elasticsearch)
+                                                                 nil)))))
 
    (route/not-found "Not Found")))
 
