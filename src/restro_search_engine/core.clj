@@ -6,7 +6,8 @@
              [keyword-params :refer [wrap-keyword-params]]
              [params :refer [wrap-params]]]
             [com.stuartsierra.component :as csc]
-            [restro-search-engine.components :as rc]))
+            [restro-search-engine.components :as rc]
+            [clojurewerkz.elastisch.rest :as cer]))
 
 
 (defonce ^{:doc "Server system representing HTTP server."}
@@ -15,19 +16,26 @@
 
 (defn app-routes
   "Returns the APP routes and injects the dependency required by routes."
-  []
-  (cc/defroutes routes
-    (GET "/ping" [] "pong")
+  [elasticsearch]
+  (clojure.pprint/pprint elasticsearch)
+  (cc/routes
+   (GET "/ping" [] "pong")
 
-    (route/not-found "Not Found")))
+   (context "/cluster" []
+            (GET "/" [] (-> (cer/get (:es-conn elasticsearch)
+                                     (cer/cluster-health-url (:es-conn elasticsearch)
+                                                             nil))
+                            str)))
+   
+   (route/not-found "Not Found")))
 
 
 (defn app
   "Constructs routes wrapped by middlewares."
-  []
-  (-> (app-routes)
+  [elasticsearch]
+  (-> (app-routes elasticsearch)
       wrap-keyword-params
-      wrap-params))
+      wrap-params)) 
 
 
 (defn start-system
@@ -46,10 +54,14 @@
 
 (defn -main
   [& args]
-  (let [routes-comp (rc/map->Routes {:app app})
+  (let [es-comp (rc/map->Elasticsearch {:host "192.168.33.21"
+                                        :port "9200"})
+        routes-comp (rc/map->Routes {:app app})
         http-server-comp (rc/map->HttpServer {:port 7799})
         system (csc/system-map
-                :routes routes-comp
+                :elasticsearch es-comp
+                :routes (csc/using routes-comp
+                                   [:elasticsearch])
                 :http-server (csc/using http-server-comp
                                         [:routes]))]
     (start-system system)
