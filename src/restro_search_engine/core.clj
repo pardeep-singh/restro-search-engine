@@ -7,9 +7,9 @@
              [params :refer [wrap-params]]]
             [com.stuartsierra.component :as csc]
             [restro-search-engine.components :as rc]
-            [clojurewerkz.elastisch.rest :as cer]
             [clojure.tools.logging :as ctl]
-            [restro-search-engine.util.http :as ruh]))
+            [restro-search-engine.util.http :as ruh]
+            [restro-search-engine.handlers.apis :as rha]))
 
 
 (defonce ^{:doc "Server system representing HTTP server."}
@@ -23,9 +23,11 @@
    (GET "/ping" [] (ruh/ok {:ping "PONG"}))
 
    (context "/cluster" []
-            (GET "/" [] (ruh/ok (cer/get (:es-conn elasticsearch)
-                                         (cer/cluster-health-url (:es-conn elasticsearch)
-                                                                 nil)))))
+            (GET "/" []
+                 (ruh/ok (rha/get-cluster-info elasticsearch)))
+
+            (GET "/_health" []
+                 (ruh/ok (rha/get-cluster-health elasticsearch))))
 
    (route/not-found "Not Found")))
 
