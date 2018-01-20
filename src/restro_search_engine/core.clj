@@ -9,7 +9,8 @@
             [restro-search-engine.components :as rc]
             [clojure.tools.logging :as ctl]
             [restro-search-engine.util.http :as ruh]
-            [restro-search-engine.handlers.apis :as rha]))
+            [restro-search-engine.handlers.apis :as rha]
+            [restro-search-engine.middlware :as rm]))
 
 
 (defonce ^{:doc "Server system representing HTTP server."}
@@ -37,7 +38,8 @@
   [elasticsearch]
   (-> (app-routes elasticsearch)
       wrap-keyword-params
-      wrap-params))
+      wrap-params
+      rm/wrap-exceptions))
 
 
 (defn start-system
@@ -56,20 +58,24 @@
 
 (defn -main
   [& args]
-  (let [es-comp (rc/map->Elasticsearch {:host "192.168.33.21"
-                                        :port "9200"})
-        routes-comp (rc/map->Routes {:app app})
-        http-server-comp (rc/map->HttpServer {:port 7799})
-        system (csc/system-map
-                :elasticsearch es-comp
-                :routes (csc/using routes-comp
-                                   [:elasticsearch])
-                :http-server (csc/using http-server-comp
-                                        [:routes]))]
-    (start-system system)
-    (.addShutdownHook (Runtime/getRuntime)
-                      (Thread. (fn []
-                                 (ctl/info "Running Shutdown Hook")
-                                 (stop-system server-system)
-                                 (shutdown-agents)
-                                 (ctl/info "Done with shutdown hook"))))))
+  (try
+    (let [es-comp (rc/map->Elasticsearch {:host "192.168.33.21"
+                                          :port "9200"})
+          routes-comp (rc/map->Routes {:app app})
+          http-server-comp (rc/map->HttpServer {:port 7799})
+          system (csc/system-map
+                  :elasticsearch es-comp
+                  :routes (csc/using routes-comp
+                                     [:elasticsearch])
+                  :http-server (csc/using http-server-comp
+                                          [:routes]))]
+      (start-system system)
+      (.addShutdownHook (Runtime/getRuntime)
+                        (Thread. (fn []
+                                   (ctl/info "Running Shutdown Hook")
+                                   (stop-system server-system)
+                                   (shutdown-agents)
+                                   (ctl/info "Done with shutdown hook")))))
+    (catch Exception exception
+      (ctl/error exception
+                 "Exception while starting the application"))))

@@ -25,3 +25,9 @@
   [zmap]
   (json-response zmap
                  :status 201))
+
+
+(defn internal-server-error
+  [message]
+  (json-response {:error message}
+                 :status 500))
