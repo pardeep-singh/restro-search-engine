@@ -35,7 +35,9 @@
             (GET "/:id" [id]
                  (ruh/ok (rha/get-restaurant-record elasticsearch id)))
             (POST "/" {m :params}
-                  (ruh/created (rha/create-restaurant-record elasticsearch m))))
+                  (ruh/created (rha/create-restaurant-record elasticsearch m)))
+            (PUT "/:id" {m :params}
+                 (ruh/ok (rha/update-restaurant-record elasticsearch m))))
 
    (route/not-found "Not Found")))
 

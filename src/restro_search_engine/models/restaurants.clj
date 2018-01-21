@@ -29,4 +29,23 @@
         result (cer/post es-conn
                          url
                          {:body record})]
-    result))
+    (assoc record
+           :id (:_id result))))
+
+
+(defn update-record
+  [{:keys [es-conn] :as conn} {:keys [id] :as record}]
+  (let [existing-document (fetch-restaurant-record conn
+                                                   id)
+        updated-doc (merge existing-document
+                           (dissoc record
+                                   :id))
+        record-url (cer/record-url es-conn
+                                   index-name
+                                   index-type
+                                   id)]
+    (cer/put es-conn
+             record-url
+             {:body updated-doc})
+    (merge existing-document
+           record)))

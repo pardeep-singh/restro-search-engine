@@ -21,3 +21,8 @@
 (defn create-restaurant-record
   [elasticsearch record]
   (rmr/create-record elasticsearch record))
+
+
+(defn update-restaurant-record
+  [elasticsearch record]
+  (rmr/update-record elasticsearch record))
