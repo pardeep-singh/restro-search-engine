@@ -1,4 +1,4 @@
-(ns restro-search-engine.middlware
+(ns restro-search-engine.middleware
   (:require [clojure.tools.logging :as ctl]
             [restro-search-engine.util.http :as ruh]))
 
@@ -13,3 +13,12 @@
                    "Internal Server Error")
         (ruh/internal-server-error "Internal Server Error")))))
 
+
+(defn log-requests
+  [handler]
+  (fn [req]
+    (let [response (handler req)]
+      (ctl/info {:status (:status response)
+                 :method (:request-method req)
+                 :uri (:uri req)})
+      response)))

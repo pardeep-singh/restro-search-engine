@@ -11,7 +11,7 @@
             [clojure.tools.logging :as ctl]
             [restro-search-engine.util.http :as ruh]
             [restro-search-engine.handlers.apis :as rha]
-            [restro-search-engine.middlware :as rm]))
+            [restro-search-engine.middleware :as rm]))
 
 
 (defonce ^{:doc "Server system representing HTTP server."}
@@ -49,7 +49,8 @@
       wrap-keyword-params
       wrap-params
       wrap-json-params
-      rm/wrap-exceptions))
+      rm/wrap-exceptions
+      rm/log-requests))
 
 
 (defn start-system
