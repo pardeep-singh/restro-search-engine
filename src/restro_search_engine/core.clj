@@ -5,6 +5,7 @@
             [ring.middleware
              [keyword-params :refer [wrap-keyword-params]]
              [params :refer [wrap-params]]]
+            [ring.middleware.json :refer [wrap-json-params]]
             [com.stuartsierra.component :as csc]
             [restro-search-engine.components :as rc]
             [clojure.tools.logging :as ctl]
@@ -32,7 +33,9 @@
 
    (context "/restaurants" []
             (GET "/:id" [id]
-                 (ruh/ok (rha/get-restaurant-record elasticsearch id))))
+                 (ruh/ok (rha/get-restaurant-record elasticsearch id)))
+            (POST "/" {m :params}
+                  (ruh/created (rha/create-restaurant-record elasticsearch m))))
 
    (route/not-found "Not Found")))
 
@@ -43,6 +46,7 @@
   (-> (app-routes elasticsearch)
       wrap-keyword-params
       wrap-params
+      wrap-json-params
       rm/wrap-exceptions))
 
 

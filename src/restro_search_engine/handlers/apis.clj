@@ -16,3 +16,8 @@
 (defn get-restaurant-record
   [elasticseach record-id]
   (rmr/fetch-restaurant-record elasticseach record-id))
+
+
+(defn create-restaurant-record
+  [elasticsearch record]
+  (rmr/create-record elasticsearch record))

@@ -3,8 +3,11 @@
             [clojurewerkz.elastisch.rest.index :as ceri]))
 
 
-(defonce index-name "restaurants")
-(defonce index-type "default")
+(defonce ^{:doc "Index name for the restaurants index."}
+  index-name "restaurants")
+
+(defonce ^{:doc "Index type mapping used in restaurants index."}
+  index-type "default")
 
 
 (defn fetch-restaurant-record
@@ -16,3 +19,14 @@
         restaurant (cer/get es-conn
                             record-url)]
     (:_source restaurant)))
+
+
+(defn create-record
+  [{:keys [es-conn]} record]
+  (let [url (cer/mapping-type-url es-conn
+                                  index-name
+                                  index-type)
+        result (cer/post es-conn
+                         url
+                         {:body record})]
+    result))
