@@ -26,3 +26,8 @@
 (defn update-restaurant-record
   [elasticsearch record]
   (rmr/update-record elasticsearch record))
+
+
+(defn search-restaurant-record
+  [elasticseach search-query]
+  (rmr/search-restaurants elasticseach search-query))
