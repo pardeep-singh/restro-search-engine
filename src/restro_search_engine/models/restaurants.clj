@@ -142,22 +142,37 @@
 
 
 (defn search-restaurants
-  [{:keys [es-conn]} {:keys [query sort-field sort-order fields]
+  [{:keys [es-conn]} {:keys [query sort-field sort-order fields page page-size]
                       :or {sort-field "_score"
                            sort-order "desc"
-                           fields []}}]
+                           fields []
+                           page 1
+                           page-size 10}}]
   (let [es-query (build-es-query query)
         sorting-object (if (= sort-field "ratings")
                          {(keyword sort-field) {:order sort-order :mode "avg"}}
                          {(keyword sort-field) {:order sort-order}})
+        from-param (-> page
+                       dec
+                       (* page-size))
         final-query (assoc es-query
                            :sort sorting-object
-                           :_source fields)
+                           :_source fields
+                           :from from-param
+                           :size page-size)
         search-url (cer/search-url es-conn
                                    index-name
                                    index-type)
         results (cer/post es-conn
                           search-url
-                          {:body final-query})]
+                          {:body final-query})
+        total-hits (get-in results [:hits :total])
+        total-pages (if (= (mod total-hits page-size) 0)
+                      (/ total-hits page-size)
+                      (-> total-hits
+                          (/ page-size)
+                          int
+                          inc))]
     {:total_hits (get-in results [:hits :total])
+     :total_pages total-pages
      :hits (mapv :_source (get-in results [:hits :hits]))}))
