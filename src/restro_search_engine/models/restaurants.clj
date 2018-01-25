@@ -1,6 +1,7 @@
 (ns restro-search-engine.models.restaurants
   (:require [clojurewerkz.elastisch.rest :as cer]
-            [clojurewerkz.elastisch.rest.index :as ceri]))
+            [clojurewerkz.elastisch.rest.index :as ceri]
+            [clojure.set :refer [rename-keys]]))
 
 
 (defonce ^{:doc "Index name for the restaurants index."}
@@ -93,12 +94,30 @@
   {:term {:delivery_only value}})
 
 
+(defmethod build-query :favourite_counts
+  [_ query]
+  (let [range_query (-> query
+                        (select-keys [:less_than_equal_to :greater_than_equal_to])
+                        (rename-keys {:less_than_equal_to :lte
+                                      :greater_than_equal_to :gte}))]
+    {:range {:favourite_counts range_query}}))
+
+
+(defmethod build-query :expected_delivery_duration
+  [_ query]
+  (let [range_query (-> query
+                        (select-keys [:less_than_equal_to :greater_than_equal_to])
+                        (rename-keys {:less_than_equal_to :lte
+                                      :greater_than_equal_to :gte}))]
+    {:range {:favourite_counts range_query}}))
+
+
 (defn build-es-query
   [query]
   (let [query-context-fields (select-keys query
                                           [:title])
         filter-context-fields (select-keys query
-                                           [:veg_only :delivery_only])
+                                           [:veg_only :delivery_only :favourite_counts :expected_delivery_duration])
         construct-queries-fn (fn [acc k v]
                                (conj acc
                                      (build-query k v)))
