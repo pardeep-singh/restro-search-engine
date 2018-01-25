@@ -132,11 +132,16 @@
 
 
 (defn search-restaurants
-  [{:keys [es-conn]} query]
+  [{:keys [es-conn]} {:keys [query sort-field sort-order]
+                      :or {sort-field "_score"
+                           sort-order "desc"}}]
   (let [es-query (build-es-query query)
+        sorting-object {(keyword sort-field) {:order sort-order}}
+        final-query (assoc es-query
+                           :sort sorting-object)
         search-url (cer/search-url es-conn
                                    index-name
                                    index-type)]
     (cer/post es-conn
               search-url
-              {:body es-query})))
+              {:body final-query})))
