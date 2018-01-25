@@ -112,6 +112,16 @@
     {:range {:favourite_counts range_query}}))
 
 
+;; results shouldnt contain fields doc with ratings from 1,2,3 if range is given as 4-5
+(defmethod build-query :ratings
+  [_ query]
+  (let [range_query (-> query
+                        (select-keys [:less_than_equal_to :greater_than_equal_to])
+                        (rename-keys {:less_than_equal_to :lte
+                                      :greater_than_equal_to :gte}))]
+    {:range {:ratings range_query}}))
+
+
 (defn build-es-query
   [query]
   (let [query-context-fields (select-keys query
@@ -137,7 +147,9 @@
                            sort-order "desc"
                            fields []}}]
   (let [es-query (build-es-query query)
-        sorting-object {(keyword sort-field) {:order sort-order}}
+        sorting-object (if (= sort-field "ratings")
+                         {(keyword sort-field) {:order sort-order :mode "avg"}}
+                         {(keyword sort-field) {:order sort-order}})
         final-query (assoc es-query
                            :sort sorting-object
                            :_source fields)
