@@ -76,7 +76,7 @@
 
 
 (defmulti build-query (fn [field _]
-                        (keyword field)))
+                        field))
 
 
 (defmethod build-query :title
@@ -122,6 +122,28 @@
     {:range {:ratings range_query}}))
 
 
+(defmethod build-query :menu_list.dish_name
+  [_ value]
+  {:nested {:path "menu_list"
+            :query {:match {:menu_list.dish_name value}}}})
+
+
+(defmethod build-query :veg
+  [_ value]
+  {:term {:menu_list.veg value}})
+
+
+(defmethod build-query :category
+  [_ value]
+  {:term {:menu_list.category value}})
+
+
+(defmethod build-query :menu_list
+  [_ value]
+  {:nested {:path "menu_list"
+             :query {:bool {:must value}}}})
+
+
 (defn build-es-query
   [query]
   (let [query-context-fields (select-keys query
@@ -136,9 +158,24 @@
                               query-context-fields)
         es-filters (reduce-kv construct-queries-fn
                               []
-                              filter-context-fields)]
-    {:query {:bool {:must es-queries
-                    :filter {:bool {:must es-filters}}}}}))
+                              filter-context-fields)
+        menulist_filters (reduce-kv (fn [acc k v]
+                                      (conj acc
+                                            (build-query k v)))
+                                    []
+                                    (select-keys (:menu_list query)
+                                                 [:veg :category]))
+        filters (conj es-filters
+                      (build-query :menu_list menulist_filters))
+        queries (if (seq (get-in query
+                                 [:menu_list :dish_name]))
+                  (->> (get-in query
+                               [:menu_list :dish_name])
+                       (build-query :menu_list.dish_name)
+                       (conj es-queries))
+                  es-queries)]
+    {:query {:bool {:must queries
+                    :filter {:bool {:must filters}}}}}))
 
 
 (defn search-restaurants
