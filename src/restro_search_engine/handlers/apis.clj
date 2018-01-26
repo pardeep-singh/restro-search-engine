@@ -29,5 +29,15 @@
 
 
 (defn search-restaurant-record
-  [elasticseach search-query]
-  (rmr/search-restaurants elasticseach search-query))
+  [elasticsearch search-query]
+  (rmr/search-restaurants elasticsearch search-query))
+
+
+(defn add-ratings
+  [elasticsearch zmap]
+  (rmr/add-ratings elasticsearch zmap))
+
+
+(defn add-dish
+  [elasticsearch zmap]
+  (rmr/add-dish elasticsearch zmap))

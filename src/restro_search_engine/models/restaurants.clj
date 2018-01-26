@@ -216,3 +216,36 @@
                    (assoc _source
                           :id _id))
                  (get-in results [:hits :hits]))}))
+
+
+(defn add-ratings
+  [es-conn {:keys [id rating]}]
+  (let [existing-record (fetch-restaurant-record es-conn id)
+        updated-record (update existing-record
+                               :ratings conj rating)
+        record-url (cer/record-url (:es-conn es-conn)
+                                   index-name
+                                   index-type
+                                   id)]
+    (cer/put (:es-conn es-conn)
+             record-url
+             {:body updated-record})
+    (assoc updated-record
+           :id id)))
+
+
+(defn add-dish
+  [es-conn zmap]
+  (let [existing-record (fetch-restaurant-record es-conn (:id zmap))
+        updated-record (update existing-record
+                               :menu_list conj (dissoc zmap
+                                                       :id))
+        record-url (cer/record-url (:es-conn es-conn)
+                                   index-name
+                                   index-type
+                                   (:id zmap))]
+    (cer/put (:es-conn es-conn)
+             record-url
+             {:body updated-record})
+    (assoc updated-record
+           :id (:id zmap))))

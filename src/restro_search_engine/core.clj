@@ -39,7 +39,11 @@
             (PUT "/:id" {m :params}
                  (ruh/ok (rha/update-restaurant-record elasticsearch m)))
             (POST "/search" {m :params}
-                  (ruh/ok (rha/search-restaurant-record elasticsearch m))))
+                  (ruh/ok (rha/search-restaurant-record elasticsearch m)))
+            (POST "/:id/ratings" {m :params}
+                  (ruh/ok (rha/add-ratings elasticsearch m)))
+            (POST "/:id/menulist" {m :params}
+                  (ruh/ok (rha/add-dish elasticsearch m))))
 
    (route/not-found "Not Found")))
 
