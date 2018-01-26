@@ -212,4 +212,7 @@
                           inc))]
     {:total_hits (get-in results [:hits :total])
      :total_pages total-pages
-     :hits (mapv :_source (get-in results [:hits :hits]))}))
+     :hits (mapv (fn [{:keys [_id _source]}]
+                   (assoc _source
+                          :id _id))
+                 (get-in results [:hits :hits]))}))
