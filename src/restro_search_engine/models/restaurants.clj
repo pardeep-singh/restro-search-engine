@@ -144,6 +144,14 @@
              :query {:bool {:must value}}}})
 
 
+(defmethod build-query :location
+  [_ {:keys [distance lat lot]
+      :or {distance "100km"}}]
+  {:geo_distance {:distance distance
+                  :pin.location {:lat lat
+                                 :lot lot}}})
+
+
 (defn build-es-query
   [query]
   (let [query-context-fields (select-keys query
