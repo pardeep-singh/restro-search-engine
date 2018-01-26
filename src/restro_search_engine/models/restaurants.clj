@@ -152,6 +152,31 @@
                                  :lot lot}}})
 
 
+(defmulti build-aggregations (fn [k]
+                               (keyword k)))
+
+
+(defmethod build-aggregations :veg_only
+  [_]
+  {:veg_only {:terms {:field "veg_only"}}})
+
+
+(defmethod build-aggregations :delivery_only
+  [_]
+  {:delivery_only {:terms {:field "delivery_only"}}})
+
+
+(defmethod build-aggregations :ratings
+  [_]
+  {:ratings {:stats {:field "ratings"}}})
+
+
+(defmethod build-aggregations :price
+  [_]
+  {:menu_list {:nested {:path "menu_list"}
+               :aggs {:price {:stats {:field "menu_list.price"}}}}})
+
+
 (defn build-es-query
   [query]
   (let [query-context-fields (select-keys query
@@ -187,13 +212,25 @@
 
 
 (defn search-restaurants
-  [{:keys [es-conn]} {:keys [query sort-field sort-order fields page page-size]
+  [{:keys [es-conn]} {:keys [query sort-field sort-order fields page page-size aggs]
                       :or {sort-field "_score"
                            sort-order "desc"
                            fields []
                            page 1
-                           page-size 10}}]
-  (let [es-query (build-es-query query)
+                           page-size 10
+                           aggs {}
+                           query {}}}]
+  (let [es-query (if (seq query)
+                   (build-es-query query)
+                   {})
+        aggs-query (if (seq aggs)
+                     (reduce (fn [m k]
+                               (-> k
+                                   build-aggregations
+                                   (merge m)))
+                             {}
+                             (set aggs))
+                     {})
         sorting-object (if (= sort-field "ratings")
                          {(keyword sort-field) {:order sort-order :mode "avg"}}
                          {(keyword sort-field) {:order sort-order}})
@@ -204,7 +241,8 @@
                            :sort sorting-object
                            :_source fields
                            :from from-param
-                           :size page-size)
+                           :size page-size
+                           :aggs aggs-query)
         search-url (cer/search-url es-conn
                                    index-name
                                    index-type)
@@ -223,7 +261,8 @@
      :hits (mapv (fn [{:keys [_id _source]}]
                    (assoc _source
                           :id _id))
-                 (get-in results [:hits :hits]))}))
+                 (get-in results [:hits :hits]))
+     :aggregations (:aggregations results {})}))
 
 
 (defn add-ratings
