@@ -111,7 +111,7 @@
   {:nested {:path "menu_list"
              :query {:bool {:must value}}}})
 
-
+;; broken in library
 (defmethod build-query :location
   [_ {:keys [distance lat lot]
       :or {distance "100km"}}]
@@ -213,8 +213,10 @@
                                     []
                                     (select-keys (:menu_list query)
                                                  [:veg :category]))
-        filters (conj es-filters
-                      (build-query :menu_list menulist_filters))
+        filters (if (seq menulist_filters)
+                  (conj es-filters
+                        (build-query :menu_list menulist_filters))
+                  es-filters)
         queries (if (seq (get-in query
                                  [:menu_list :dish_name]))
                   (->> (get-in query
@@ -222,8 +224,12 @@
                        (build-query :menu_list.dish_name)
                        (conj es-queries))
                   es-queries)]
-    {:query {:bool {:must queries
-                    :filter {:bool {:must filters}}}}}))
+    (cond
+      (and (seq queries) (seq filters)) {:query {:bool {:must queries
+                                                        :filter {:bool {:must filters}}}}}
+      (seq queries) {:query {:bool {:must queries}}}
+      (seq filters) {:query {:bool {:filter {:bool {:must filters}}}}}
+      :else {})))
 
 
 (defn search-restaurants
