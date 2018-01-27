@@ -68,7 +68,8 @@
         (ctl/info "Starting ES component")
         (let [es-url (format "http://%s:%s" host port)
               conn (cer/connect es-url
-                                {:connection-manager (make-reusable-conn-manager {:timeout 10})})]
+                                {:connection-manager (make-reusable-conn-manager {:timeout 10})
+                                 :throw-exceptions? false})]
           (assoc this
                  :es-conn conn)))
       (do
