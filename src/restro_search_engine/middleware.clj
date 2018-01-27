@@ -22,8 +22,12 @@
 (defn log-requests
   [handler]
   (fn [req]
-    (let [response (handler req)]
+    (let [timestamp (System/currentTimeMillis)
+          response (handler req)]
       (ctl/info {:status (:status response)
                  :method (:request-method req)
-                 :uri (:uri req)})
+                 :uri (:uri req)
+                 :duration (str (- (System/currentTimeMillis)
+                                   timestamp)
+                                "ms")})
       response)))
