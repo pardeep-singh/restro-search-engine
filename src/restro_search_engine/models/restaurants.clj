@@ -1,7 +1,11 @@
 (ns restro-search-engine.models.restaurants
   (:require [clojurewerkz.elastisch.rest :as cer]
             [clojurewerkz.elastisch.rest.index :as ceri]
-            [clojure.set :refer [rename-keys]]))
+            [clojure.set :refer [rename-keys]]
+            [clojurewerkz.elastisch.rest.response :as cerr]
+            [restro-search-engine.util.http :as ruh]
+            [slingshot.slingshot :refer [throw+]]
+            [clojure.tools.logging :as ctl]))
 
 
 (defonce ^{:doc "Index name for the restaurants index."}
@@ -19,7 +23,8 @@
   index-settings-mappings {:settings {:number_of_replicas 1
                                       :number_of_shards 1
                                       :refresh_interval "5s"}
-                           :mappings {:default {:properties {:title {:type "text"}
+                           :mappings {:default {:dynamic "strict"
+                                                :properties {:title {:type "text"}
                                                              :email {:type "keyword"}
                                                              :phone_number {:type "keyword"}
                                                              :veg_only {:type "boolean"}
@@ -43,9 +48,11 @@
                                    index-name
                                    index-type
                                    id)
-        restaurant (cer/get es-conn
-                            record-url)]
-    (:_source restaurant)))
+        result (cer/get es-conn
+                        record-url)]
+    (if (cerr/found? result)
+      (:_source result)
+      (throw+ (ruh/not-found-exception (str "Document with given " id " id not found."))))))
 
 
 (defn create-record
@@ -56,8 +63,12 @@
         result (cer/post es-conn
                          url
                          {:body record})]
-    (assoc record
-           :id (:_id result))))
+    (if (cerr/created? result)
+      (assoc record
+             :id (:_id result))
+      (do
+        (ctl/error result)
+        (throw (Exception. "Not able to create document"))))))
 
 
 (defn update-record

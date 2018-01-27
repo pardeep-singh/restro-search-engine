@@ -2,6 +2,9 @@
   (:require [cheshire.core :as cc]))
 
 
+(defrecord HTTPError [type status msg data])
+
+
 (defn json-response
   [response & {:keys [status]}]
   {:status status
@@ -31,3 +34,23 @@
   [message]
   (json-response {:error message}
                  :status 500))
+
+
+(defn not-found
+  [message]
+  (json-response {:error message}
+                 :status 404))
+
+
+(defn not-found-exception
+  [msg]
+  (HTTPError. ::not-found
+              404
+              msg
+              nil))
+
+
+(defn http-error
+  [{:keys [status] :as response}]
+  (json-response response
+                 :status status))
