@@ -41,3 +41,8 @@
 (defn add-dish
   [elasticsearch zmap]
   (rmr/add-dish elasticsearch zmap))
+
+
+(defn suggestions
+  [elasticsearch query]
+  (rmr/autocompletion elasticsearch query))

@@ -43,7 +43,9 @@
             (POST "/:id/ratings" {m :params}
                   (ruh/ok (rha/add-ratings elasticsearch m)))
             (POST "/:id/menulist" {m :params}
-                  (ruh/ok (rha/add-dish elasticsearch m))))
+                  (ruh/ok (rha/add-dish elasticsearch m)))
+            (POST "/suggest" {m :params}
+                  (ruh/ok (rha/suggestions elasticsearch m))))
 
    (route/not-found "Not Found")))
 

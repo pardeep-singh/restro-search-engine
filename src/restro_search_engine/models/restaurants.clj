@@ -24,12 +24,13 @@
                                       :number_of_shards 1
                                       :refresh_interval "5s"}
                            :mappings {:default {:dynamic "strict"
-                                                :properties {:title {:type "text"}
+                                                :properties {:title {:type "text"
+                                                                     :fields {:autocomplete {:type "completion"}}}
                                                              :email {:type "keyword"}
                                                              :phone_number {:type "keyword"}
                                                              :veg_only {:type "boolean"}
                                                              :favourite_counts {:type "long"}
-                                                             :delivery_only {:type "long"}
+                                                             :delivery_only {:type "boolean"}
                                                              :ratings {:type "integer"}
                                                              :expected_delivery_duration {:type "integer"}
                                                              :location {:type "geo_point",
@@ -40,53 +41,6 @@
                                                                                       :price {:type "integer"}
                                                                                       :category {:type "keyword"}
                                                                                       :expected_preparation_duration {:type "integer"}}}}}}})
-
-
-(defn fetch-restaurant-record
-  [{:keys [es-conn]} id]
-  (let [record-url (cer/record-url es-conn
-                                   index-name
-                                   index-type
-                                   id)
-        result (cer/get es-conn
-                        record-url)]
-    (if (cerr/found? result)
-      (:_source result)
-      (throw+ (ruh/not-found-exception (str "Document with given " id " id not found."))))))
-
-
-(defn create-record
-  [{:keys [es-conn]} record]
-  (let [url (cer/mapping-type-url es-conn
-                                  index-name
-                                  index-type)
-        result (cer/post es-conn
-                         url
-                         {:body record})]
-    (if (cerr/created? result)
-      (assoc record
-             :id (:_id result))
-      (do
-        (ctl/error result)
-        (throw (Exception. "Not able to create document"))))))
-
-
-(defn update-record
-  [{:keys [es-conn] :as conn} {:keys [id] :as record}]
-  (let [existing-document (fetch-restaurant-record conn
-                                                   id)
-        updated-doc (merge existing-document
-                           (dissoc record
-                                   :id))
-        record-url (cer/record-url es-conn
-                                   index-name
-                                   index-type
-                                   id)]
-    (cer/put es-conn
-             record-url
-             {:body updated-doc})
-    (merge existing-document
-           record)))
 
 
 (defmulti build-query (fn [field _]
@@ -189,6 +143,53 @@
   [_]
   {:menu_list {:nested {:path "menu_list"}
                :aggs {:price {:stats {:field "menu_list.price"}}}}})
+
+
+(defn fetch-restaurant-record
+  [{:keys [es-conn]} id]
+  (let [record-url (cer/record-url es-conn
+                                   index-name
+                                   index-type
+                                   id)
+        result (cer/get es-conn
+                        record-url)]
+    (if (cerr/found? result)
+      (:_source result)
+      (throw+ (ruh/not-found-exception (str "Document with given " id " id not found."))))))
+
+
+(defn create-record
+  [{:keys [es-conn]} record]
+  (let [url (cer/mapping-type-url es-conn
+                                  index-name
+                                  index-type)
+        result (cer/post es-conn
+                         url
+                         {:body record})]
+    (if (cerr/created? result)
+      (assoc record
+             :id (:_id result))
+      (do
+        (ctl/error result)
+        (throw (Exception. "Not able to create document"))))))
+
+
+(defn update-record
+  [{:keys [es-conn] :as conn} {:keys [id] :as record}]
+  (let [existing-document (fetch-restaurant-record conn
+                                                   id)
+        updated-doc (merge existing-document
+                           (dissoc record
+                                   :id))
+        record-url (cer/record-url es-conn
+                                   index-name
+                                   index-type
+                                   id)]
+    (cer/put es-conn
+             record-url
+             {:body updated-doc})
+    (merge existing-document
+           record)))
 
 
 (defn build-es-query
@@ -310,3 +311,22 @@
              {:body updated-record})
     (assoc updated-record
            :id (:id zmap))))
+
+
+(defn autocompletion
+  [{:keys [es-conn]} {:keys [title]}]
+  (if (seq title)
+    (let [search-url (cer/search-url es-conn
+                                     index-name
+                                     index-type)
+          autocomplete-query {:size 0
+                              :suggest {:restaurants {:text title
+                                                      :completion {:field "title.autocomplete"}}}}
+          results (cer/post es-conn
+                            search-url
+                            {:body autocomplete-query})]
+      {:suggestions (mapv :_source (-> results
+                                       (get-in [:suggest :restaurants])
+                                       first
+                                       (get-in [:options])))})
+    {:suggestions []}))
