@@ -15,23 +15,26 @@
            :number_of_shards 1
            :refresh_interval "5s"}})
 
-(defonce ^{:doc "Restaurants Index Mappings"}
-  index-mappings {:default {:properties {:title {:type "text"}
-                                         :email {:type "keyword"}
-                                         :phone_number {:type "keyword"}
-                                         :veg_only {:type "boolean"}
-                                         :favourite_counts {:type "long"}
-                                         :delivery_only {:type "long"}
-                                         :ratings {:type "integer"}
-                                         :expected_delivery_duration {:type "integer"}
-                                         :location {:type "geo_point",
-                                                    :ignore_malformed true}
-                                         :menu_list {:type "nested"
-                                                     :properties {:dish_name {:type "text"}
-                                                                  :veg {:type "boolean"}
-                                                                  :price {:type "integer"}
-                                                                  :category {:type "keyword"}
-                                                                  :expected_preparation_duration {:type "integer"}}}}}})
+(defonce ^{:doc "Restaurants Index Mappings and settings"}
+  index-settings-mappings {:settings {:number_of_replicas 1
+                                      :number_of_shards 1
+                                      :refresh_interval "5s"}
+                           :mappings {:default {:properties {:title {:type "text"}
+                                                             :email {:type "keyword"}
+                                                             :phone_number {:type "keyword"}
+                                                             :veg_only {:type "boolean"}
+                                                             :favourite_counts {:type "long"}
+                                                             :delivery_only {:type "long"}
+                                                             :ratings {:type "integer"}
+                                                             :expected_delivery_duration {:type "integer"}
+                                                             :location {:type "geo_point",
+                                                                        :ignore_malformed true}
+                                                             :menu_list {:type "nested"
+                                                                         :properties {:dish_name {:type "text"}
+                                                                                      :veg {:type "boolean"}
+                                                                                      :price {:type "integer"}
+                                                                                      :category {:type "keyword"}
+                                                                                      :expected_preparation_duration {:type "integer"}}}}}}})
 
 
 (defn fetch-restaurant-record
