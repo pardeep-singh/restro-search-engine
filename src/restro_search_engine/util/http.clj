@@ -54,3 +54,9 @@
   [{:keys [status] :as response}]
   (json-response response
                  :status status))
+
+
+(defn bad-request
+  [zmap]
+  (json-response zmap
+                 :status 400))

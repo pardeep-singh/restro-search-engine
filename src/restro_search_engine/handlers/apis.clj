@@ -1,6 +1,7 @@
 (ns restro-search-engine.handlers.apis
   (:require [restro-search-engine.models.cluster :as rmc]
-            [restro-search-engine.models.restaurants :as rmr]))
+            [restro-search-engine.models.restaurants :as rmr]
+            [restro-search-engine.coercion.coerce :as rcc]))
 
 
 (defn get-cluster-info
@@ -20,7 +21,9 @@
 
 (defn create-restaurant-record
   [elasticsearch record]
-  (rmr/create-record elasticsearch record))
+  (->> record
+       rcc/coerce-add-document-request
+       (rmr/create-record elasticsearch)))
 
 
 (defn update-restaurant-record
