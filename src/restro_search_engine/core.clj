@@ -32,8 +32,8 @@
                  (ruh/ok (rha/get-cluster-health elasticsearch))))
 
    (context "/restaurants" []
-            (GET "/:id" [id]
-                 (ruh/ok (rha/get-restaurant-record elasticsearch id)))
+            (GET "/:id" {m :params}
+                 (ruh/ok (rha/get-restaurant-record elasticsearch m)))
             (POST "/" {m :params}
                   (ruh/created (rha/create-restaurant-record elasticsearch m)))
             (PUT "/:id" {m :params}

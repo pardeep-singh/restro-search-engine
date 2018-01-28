@@ -146,7 +146,7 @@
 
 
 (defn fetch-restaurant-record
-  [{:keys [es-conn]} id]
+  [{:keys [es-conn]} {:keys [id] :as zmap}]
   (let [record-url (cer/record-url es-conn
                                    index-name
                                    index-type

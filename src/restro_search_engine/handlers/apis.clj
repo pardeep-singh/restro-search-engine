@@ -15,8 +15,10 @@
 
 
 (defn get-restaurant-record
-  [elasticseach record-id]
-  (rmr/fetch-restaurant-record elasticseach record-id))
+  [elasticseach record]
+  (->> record
+       rcc/coerce-get-document-request
+       (rmr/fetch-restaurant-record elasticseach)))
 
 
 (defn create-restaurant-record

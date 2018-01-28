@@ -78,3 +78,7 @@
    (s/optional-key :favourite_counts) s/Num
    (s/optional-key :ratings) Ratings
    (s/optional-key :menu_list) [MenuList]})
+
+
+(s/defschema GetRestaurantDocumentRequest
+  {:id RestaurantID})
