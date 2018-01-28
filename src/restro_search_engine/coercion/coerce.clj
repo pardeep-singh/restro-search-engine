@@ -28,6 +28,11 @@
   (scoerce/json-coercion-matcher schema))
 
 
+(defn get-suggestion-request
+  [schema]
+  (scoerce/json-coercion-matcher schema))
+
+
 (def coerce-add-document-request
   (scoerce/coercer! rcs/CreateDocumentRequest
                     add-document-request-matchers))
@@ -51,3 +56,8 @@
 (def coerce-add-dish-request
   (scoerce/coercer! rcs/AddDishRequest
                     add-dish-request-matchers))
+
+
+(def coerce-get-suggestion-request
+  (scoerce/coercer! rcs/GetSuggestionRequest
+                    get-suggestion-request))

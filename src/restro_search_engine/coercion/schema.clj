@@ -97,3 +97,7 @@
 (s/defschema AddDishRequest
   (assoc MenuList
          :id RestaurantID))
+
+
+(s/defschema GetSuggestionRequest
+  {:title (s/constrained s/Str non-empty-string?)})

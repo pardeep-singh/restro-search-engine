@@ -56,4 +56,6 @@
 
 (defn suggestions
   [elasticsearch query]
-  (rmr/autocompletion elasticsearch query))
+  (->> query
+       rcc/coerce-get-suggestion-request
+       (rmr/autocompletion elasticsearch)))
