@@ -60,3 +60,21 @@
 
 (s/defschema CreateDocumentRequest
   Restaurant)
+
+
+(s/defschema RestaurantID
+  (s/constrained s/Str non-empty-string?))
+
+
+(s/defschema UpdateDocumentRequest
+  {:id RestaurantID
+   (s/optional-key :title) (s/constrained s/Str non-empty-string?)
+   (s/optional-key :email) (s/constrained s/Str valid-email?)
+   (s/optional-key :phone_number) (s/constrained s/Str valid-phone-number?)
+   (s/optional-key :veg_only) s/Bool
+   (s/optional-key :delivery_only) s/Bool
+   (s/optional-key :expected_delivery_duration) s/Int
+   (s/optional-key :location) (s/constrained s/Str valid-location?)
+   (s/optional-key :favourite_counts) s/Num
+   (s/optional-key :ratings) Ratings
+   (s/optional-key :menu_list) [MenuList]})

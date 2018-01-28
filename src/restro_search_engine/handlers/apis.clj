@@ -28,7 +28,9 @@
 
 (defn update-restaurant-record
   [elasticsearch record]
-  (rmr/update-record elasticsearch record))
+  (->> record
+       rcc/coerce-update-document-request
+       (rmr/update-record elasticsearch)))
 
 
 (defn search-restaurant-record

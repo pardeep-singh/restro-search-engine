@@ -8,7 +8,16 @@
   (scoerce/json-coercion-matcher schema))
 
 
+(defn update-document-request-matchers
+  [schema]
+  (scoerce/json-coercion-matcher schema))
+
+
 (def coerce-add-document-request
   (scoerce/coercer! rcs/CreateDocumentRequest
                     add-document-request-matchers))
 
+
+(def coerce-update-document-request
+  (scoerce/coercer! rcs/UpdateDocumentRequest
+                    update-document-request-matchers))
