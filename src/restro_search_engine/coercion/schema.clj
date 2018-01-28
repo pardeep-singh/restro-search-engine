@@ -101,3 +101,67 @@
 
 (s/defschema GetSuggestionRequest
   {:title (s/constrained s/Str non-empty-string?)})
+
+
+(s/defschema SortOrder
+  (s/enum "asc" "desc"))
+
+
+(s/defschema SortField
+  (s/enum "favourite_counts" "expected_delivery_duration" "ratings" "menu_list.price"
+          "menu_list.expected_preparation_time"))
+
+
+(s/defschema Fields
+  (s/enum "title" "phone_number" "email" "expected_delivery_duration"
+          "favourite_counts" "veg_only" "delivery_only" "location" "ratings"
+          "menu_list.dish_name" "menu_list.price" "menu_list.veg" "menu_list.category"
+          "menu_list.expected_preparation_duration"))
+
+
+(s/defschema Aggregations
+  (s/enum "veg_only" "delivery_only" "ratings" "price"))
+
+
+(s/defschema Page
+  (s/constrained s/Int #(> % 0)))
+
+
+(s/defschema PageSize
+  (s/constrained s/Int #(and (> % 0)
+                             (<= % 100))))
+
+
+(s/defschema FavouriteCountsQuery
+  {(s/optional-key :greater_than_equal_to) s/Int
+   (s/optional-key :less_than_equal_to) s/Int})
+
+
+(s/defschema ExpectedDeliveryDurationQuery
+  {(s/optional-key :greater_than_equal_to) s/Int
+   (s/optional-key :less_than_equal_to) s/Int})
+
+
+(s/defschema MenuListQuery
+  {(s/optional-key :dish_name) (s/constrained s/Str non-empty-string?)
+   (s/optional-key :veg) s/Bool
+   (s/optional-key :category) (s/constrained s/Str non-empty-string?)})
+
+
+(s/defschema SearchQuery
+  {(s/optional-key :title) (s/constrained s/Str non-empty-string?)
+   (s/optional-key :veg_only) s/Bool
+   (s/optional-key :delivery_only) s/Bool
+   (s/optional-key :favourite_counts) FavouriteCountsQuery
+   (s/optional-key :expected_delivery_duration) ExpectedDeliveryDurationQuery
+   (s/optional-key :menu_list) MenuListQuery})
+
+
+(s/defschema SearchRequest
+  {(s/optional-key :sort-field) SortField
+   (s/optional-key :sort-order) SortOrder
+   (s/optional-key :fields) [Fields]
+   (s/optional-key :aggs) [Aggregations]
+   (s/optional-key :page) Page
+   (s/optional-key :page-size) PageSize
+   (s/optional-key :query) SearchQuery})

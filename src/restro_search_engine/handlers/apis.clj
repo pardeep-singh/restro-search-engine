@@ -37,7 +37,9 @@
 
 (defn search-restaurant-record
   [elasticsearch search-query]
-  (rmr/search-restaurants elasticsearch search-query))
+  (->> search-query
+       rcc/coerce-search-request
+       (rmr/search-restaurants elasticsearch)))
 
 
 (defn add-ratings

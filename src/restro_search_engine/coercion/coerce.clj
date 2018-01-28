@@ -33,6 +33,11 @@
   (scoerce/json-coercion-matcher schema))
 
 
+(defn search-request
+  [schema]
+  (scoerce/json-coercion-matcher schema))
+
+
 (def coerce-add-document-request
   (scoerce/coercer! rcs/CreateDocumentRequest
                     add-document-request-matchers))
@@ -61,3 +66,8 @@
 (def coerce-get-suggestion-request
   (scoerce/coercer! rcs/GetSuggestionRequest
                     get-suggestion-request))
+
+
+(def coerce-search-request
+  (scoerce/coercer! rcs/SearchRequest
+                    search-request))
