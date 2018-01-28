@@ -287,8 +287,8 @@
 
 
 (defn add-ratings
-  [es-conn {:keys [id rating]}]
-  (let [existing-record (fetch-restaurant-record es-conn id)
+  [es-conn {:keys [id rating] :as zmap}]
+  (let [existing-record (fetch-restaurant-record es-conn zmap)
         updated-record (update existing-record
                                :ratings conj rating)
         record-url (cer/record-url (:es-conn es-conn)

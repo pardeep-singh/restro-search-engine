@@ -18,6 +18,11 @@
   (scoerce/json-coercion-matcher schema))
 
 
+(defn add-rating-request-matchers
+  [schema]
+  (scoerce/json-coercion-matcher schema))
+
+
 (def coerce-add-document-request
   (scoerce/coercer! rcs/CreateDocumentRequest
                     add-document-request-matchers))
@@ -31,3 +36,8 @@
 (def coerce-get-document-request
   (scoerce/coercer! rcs/GetRestaurantDocumentRequest
                     get-document-request-matchers))
+
+
+(def coerce-add-rating-request
+  (scoerce/coercer! rcs/AddRatingsRequest
+                    add-rating-request-matchers))

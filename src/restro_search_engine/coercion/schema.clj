@@ -14,10 +14,15 @@
     (re-seq email-regex email)))
 
 
+(defn valid-rating?
+  [rating]
+  (and (>= rating 1)
+       (<= rating 5)))
+
+
 (defn valid-ratings?
   [ratings]
-  (let [valid-ratings (filter #(and (>= % 1)
-                                    (<= % 5))
+  (let [valid-ratings (filter valid-rating?
                               ratings)]
     (= (count ratings) (count valid-ratings))))
 
@@ -82,3 +87,8 @@
 
 (s/defschema GetRestaurantDocumentRequest
   {:id RestaurantID})
+
+
+(s/defschema AddRatingsRequest
+  {:id RestaurantID
+   :rating (s/constrained s/Int valid-rating?)})

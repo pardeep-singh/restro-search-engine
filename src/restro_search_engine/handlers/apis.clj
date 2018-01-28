@@ -42,7 +42,9 @@
 
 (defn add-ratings
   [elasticsearch zmap]
-  (rmr/add-ratings elasticsearch zmap))
+  (->> zmap
+       rcc/coerce-add-rating-request
+       (rmr/add-ratings elasticsearch)))
 
 
 (defn add-dish
