@@ -304,7 +304,7 @@
 
 (defn add-dish
   [es-conn zmap]
-  (let [existing-record (fetch-restaurant-record es-conn (:id zmap))
+  (let [existing-record (fetch-restaurant-record es-conn zmap)
         updated-record (update existing-record
                                :menu_list conj (dissoc zmap
                                                        :id))

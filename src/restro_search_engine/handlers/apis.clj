@@ -49,7 +49,9 @@
 
 (defn add-dish
   [elasticsearch zmap]
-  (rmr/add-dish elasticsearch zmap))
+  (->> zmap
+       rcc/coerce-add-dish-request
+       (rmr/add-dish elasticsearch)))
 
 
 (defn suggestions

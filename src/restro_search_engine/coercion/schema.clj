@@ -92,3 +92,8 @@
 (s/defschema AddRatingsRequest
   {:id RestaurantID
    :rating (s/constrained s/Int valid-rating?)})
+
+
+(s/defschema AddDishRequest
+  (assoc MenuList
+         :id RestaurantID))
