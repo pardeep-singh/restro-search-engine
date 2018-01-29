@@ -11,7 +11,8 @@
             [clojure.tools.logging :as ctl]
             [restro-search-engine.util.http :as ruh]
             [restro-search-engine.handlers.apis :as rha]
-            [restro-search-engine.middleware :as rm]))
+            [restro-search-engine.middleware :as rm]
+            [restro-search-engine.util.util :as ruu]))
 
 
 (defonce ^{:doc "Server system representing HTTP server."}
@@ -78,10 +79,10 @@
 (defn -main
   [& args]
   (try
-    (let [es-comp (rc/map->Elasticsearch {:host "192.168.33.21"
-                                          :port "9200"})
+    (let [configs (ruu/read-configs)
+          es-comp (rc/map->Elasticsearch (:elasticsearch configs))
           routes-comp (rc/map->Routes {:app app})
-          http-server-comp (rc/map->HttpServer {:port 7799})
+          http-server-comp (rc/map->HttpServer {:port (:port configs)})
           system (csc/system-map
                   :elasticsearch es-comp
                   :routes (csc/using routes-comp

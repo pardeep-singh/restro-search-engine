@@ -3,7 +3,12 @@
             [restro-search-engine.components :as rc]
             [clj-http.client :as http]
             [cheshire.core :as cc]
-            [com.stuartsierra.component :as csc]))
+            [com.stuartsierra.component :as csc]
+            [clojure.java.io :refer [resource]]
+            [clojure.edn :as edn]))
+
+
+(defonce default-settings-file "configs.clj")
 
 
 (defn create-index*
@@ -28,3 +33,11 @@
                                 index-configs)]
     (cc/parse-string (:body response)
                      true)))
+
+
+(defn read-configs
+  ([]
+   (read-configs default-settings-file))
+  ([file-name]
+   (let [file-path ((comp str resource) default-settings-file)]
+     (edn/read-string (slurp file-path)))))
