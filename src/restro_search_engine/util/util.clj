@@ -5,7 +5,8 @@
             [cheshire.core :as cc]
             [com.stuartsierra.component :as csc]
             [clojure.java.io :refer [resource]]
-            [clojure.edn :as edn]))
+            [clojure.edn :as edn]
+            [clojurewerkz.elastisch.rest :as cer]))
 
 
 (defonce default-settings-file "configs.clj")
@@ -25,8 +26,8 @@
   [& {:keys [index index-configs]
       :or {index rmr/index-name
            index-configs rmr/index-settings-mappings}}]
-  (let [es-comp (rc/map->Elasticsearch {:host "192.168.33.21"
-                                        :port "9200"})
+  (let [configs (read-configs)
+        es-comp (rc/map->Elasticsearch (:elasticsearch configs))
         system (csc/start es-comp)
         response (create-index* system
                                 index
@@ -41,3 +42,10 @@
   ([file-name]
    (let [file-path ((comp str resource) default-settings-file)]
      (edn/read-string (slurp file-path)))))
+
+
+(defn delete-index
+  [{:keys [es-conn]} index-name]
+  (let [index-url (cer/index-url es-conn
+                                 index-name)]
+    (cer/delete es-conn index-url)))
