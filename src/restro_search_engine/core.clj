@@ -76,19 +76,24 @@
     (alter-var-root #'server-system (constantly server-system*))))
 
 
+(defn construct-system
+  [configs]
+  (let [es-comp (rc/map->Elasticsearch (:elasticsearch configs))
+        routes-comp (rc/map->Routes {:app app})
+        http-server-comp (rc/map->HttpServer {:port (:port configs)})]
+    (csc/system-map
+     :elasticsearch es-comp
+     :routes (csc/using routes-comp
+                        [:elasticsearch])
+     :http-server (csc/using http-server-comp
+                             [:routes]))))
+
+
 (defn -main
   [& args]
   (try
     (let [configs (ruu/read-configs)
-          es-comp (rc/map->Elasticsearch (:elasticsearch configs))
-          routes-comp (rc/map->Routes {:app app})
-          http-server-comp (rc/map->HttpServer {:port (:port configs)})
-          system (csc/system-map
-                  :elasticsearch es-comp
-                  :routes (csc/using routes-comp
-                                     [:elasticsearch])
-                  :http-server (csc/using http-server-comp
-                                          [:routes]))]
+          system (construct-system configs)]
       (start-system system)
       (.addShutdownHook (Runtime/getRuntime)
                         (Thread. (fn []

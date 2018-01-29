@@ -12,6 +12,14 @@
 (defonce default-settings-file "configs.clj")
 
 
+(defn read-configs
+  ([]
+   (read-configs default-settings-file))
+  ([file-name]
+   (let [file-path ((comp str resource) default-settings-file)]
+     (edn/read-string (slurp file-path)))))
+
+
 (defn create-index*
   [{:keys [es-conn]} index-name index-configs]
   (let [uri (str (:uri es-conn) "/" index-name)
@@ -34,14 +42,6 @@
                                 index-configs)]
     (cc/parse-string (:body response)
                      true)))
-
-
-(defn read-configs
-  ([]
-   (read-configs default-settings-file))
-  ([file-name]
-   (let [file-path ((comp str resource) default-settings-file)]
-     (edn/read-string (slurp file-path)))))
 
 
 (defn delete-index
