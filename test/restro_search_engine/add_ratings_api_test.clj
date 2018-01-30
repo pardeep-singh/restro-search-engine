@@ -1,4 +1,4 @@
-(ns restro-search-engine.add-restaurant-api-test
+(ns restro-search-engine.add-ratings-api-test
   (:require  [clojure.test :refer :all]
              [cheshire.core :as cc]
              [clj-http.client :as http]
@@ -9,12 +9,11 @@
              [clojure.tools.logging :as ctl]))
 
 
-
-
 (def service-port (atom nil))
 (def server-system (atom nil))
 (def service-url (atom nil))
 (def index-name (atom nil))
+(def doc-id (atom nil))
 (def sample-restaurant-data {:title "KFC"
                              :email "kfc@mail.com"
                              :phone_number "+919955599555"
@@ -46,10 +45,13 @@
                    rc/start-system)
         random-index-name (str rmr/index-name
                                (apply str (take 5 (repeatedly #(char (+ (rand 26) 97))))))]
+    
     (ruu/create-index* (:elasticsearch system)
                        random-index-name
                        rmr/index-settings-mappings)
     (alter-var-root #'rmr/index-name (constantly random-index-name))
+    (reset! doc-id (:id (rmr/create-record (:elasticsearch system)
+                                           sample-restaurant-data)))
     (reset! index-name random-index-name)
     (reset! service-port random-service-port)
     (reset! server-system system)
@@ -80,59 +82,39 @@
 (use-fixtures :each each-fixture)
 
 
-(deftest add-restaurant-api-test
-  (testing "Add Restaurant API test"
-    (let [result (http/post (str @service-url "/restaurants")
-                            {:body (cc/generate-string sample-restaurant-data)
-                             :content-type :json})
+(deftest add-restaurant-ratings-api-test
+  (testing "Add Restaurant Ratings API test"
+    (let [result (http/post (str @service-url "/restaurants/" @doc-id "/ratings")
+                            {:body (cc/generate-string {:rating 4})
+                             :content-type :json
+                             :throw-exceptions? false})
           body (cc/parse-string (:body result) true)]
-      (is (= (:status result) 201)
-          "Response status is 201.")
-      (is (= (dissoc body
-                     :id)
-             sample-restaurant-data)
-          "Document returned in response matches with the given document."))))
+      (is (= (:status result) 200)
+          "Response status is 200")
+      (is (= (:ratings body)
+             [1 2 3 4])
+          "Response contains updated value of ratings field."))))
 
 
-(deftest add-restaurant-api-test-with-invalid-input-document
-  (with-stub [[ctl/log* (fn [& args] (constantly true))]]
-    (testing "Add Restaurant API test with missing fields"
-      (let [result (http/post (str @service-url "/restaurants")
-                              {:body (cc/generate-string (dissoc sample-restaurant-data
-                                                                 :email :phone_number))
-                               :content-type :json
-                               :throw-exceptions? false})
-            body (cc/parse-string (:body result) true)]
-        (is (= (:status result) 400)
-            "Response status is 400.")
-        (is (= (:missing-fields body)
-               ["email" "phone_number"])
-            "Response contains missing-fields with email, phone_number fields."))))
-  (testing "Add Restaurant API test with invalid values"
+(deftest add-restaurant-rating-api-test-with-invalid-values
+  (testing "Add Restaurant Rating API test with invalid id"
     (with-stub [[ctl/log* (fn [& args] (constantly true))]]
-      (let [result (http/post (str @service-url "/restaurants")
-                              {:body (cc/generate-string (assoc sample-restaurant-data
-                                                                :email "invalid_email"
-                                                                :location "invalid_location"
-                                                                :ratings [100]))
+      (let [result (http/post (str @service-url "/restaurants/random/ratings")
+                              {:body (cc/generate-string {:rating 1})
                                :content-type :json
                                :throw-exceptions? false})
             body (cc/parse-string (:body result) true)]
-        (is (= (:status result) 400)
-            "Response status is 400.")
-        (is (= (:invalid-fields body)
-               ["email" "ratings" "location"])
-            "Response contains invalid-fields with email, location, ratings fields."))))
-  (testing "Add Restaurant API test with additional field"
+        (is (= (:status result) 404)
+            "Response status is 404"))))
+  (testing "Add Restaurant Rating API test with invalid values"
     (with-stub [[ctl/log* (fn [& args] (constantly true))]]
-      (let [result (http/post (str @service-url "/restaurants")
-                              {:body (cc/generate-string (assoc sample-restaurant-data
-                                                                :random "random field"))
+      (let [result (http/post (str @service-url "/restaurants/" @doc-id "/ratings")
+                              {:body (cc/generate-string {:rating 100})
                                :content-type :json
                                :throw-exceptions? false})
             body (cc/parse-string (:body result) true)]
         (is (= (:status result) 400)
-            "Response status is 400.")
+            "Response status is 400")
         (is (= (:invalid-fields body)
-               ["random"])
-            "Response contains invalid-fields with random field.")))))
+               ["rating"])
+            "Response contains invalid-fields with rating field.")))))

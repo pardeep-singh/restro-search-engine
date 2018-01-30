@@ -14,25 +14,25 @@
 (def service-url (atom nil))
 (def index-name (atom nil))
 (def doc-id (atom nil))
-(def sample-doc {:title "KFC"
-                 :email "kfc@mail.com"
-                 :phone_number "+919955599555"
-                 :favourite_counts 100
-                 :veg_only false
-                 :delivery_only false
-                 :location "18.1,74.1"
-                 :expected_delivery_duration 100
-                 :ratings [1 2 3]
-                 :menu_list [{:dish_name "Chicken Popcorns"
-                              :veg false
-                              :price 100
-                              :category "Quickbite"
-                              :expected_preparation_duration 5}
-                             {:dish_name "Veg Zinger Burger"
-                              :veg true
-                              :price 150
-                              :category "Fast Food"
-                              :expected_preparation_duration 10}]})
+(def sample-restaurant-data {:title "KFC"
+                             :email "kfc@mail.com"
+                             :phone_number "+919955599555"
+                             :favourite_counts 100
+                             :veg_only false
+                             :delivery_only false
+                             :location "18.1,74.1"
+                             :expected_delivery_duration 100
+                             :ratings [1 2 3]
+                             :menu_list [{:dish_name "Chicken Popcorns"
+                                          :veg false
+                                          :price 100
+                                          :category "Quickbite"
+                                          :expected_preparation_duration 5}
+                                         {:dish_name "Veg Zinger Burger"
+                                          :veg true
+                                          :price 150
+                                          :category "Fast Food"
+                                          :expected_preparation_duration 10}]})
 
 (defn test-setup
   []
@@ -51,7 +51,7 @@
                        rmr/index-settings-mappings)
     (alter-var-root #'rmr/index-name (constantly random-index-name))
     (reset! doc-id (:id (rmr/create-record (:elasticsearch system)
-                                           sample-doc)))
+                                           sample-restaurant-data)))
     (reset! index-name random-index-name)
     (reset! service-port random-service-port)
     (reset! server-system system)
@@ -85,15 +85,15 @@
 (deftest update-restaurant-api-test
   (testing "Update Restaurant API test"
     (let [result (http/put (str @service-url "/restaurants/" @doc-id)
-                           {:body (cc/generate-string {:favourite_counts 100})
+                           {:body (cc/generate-string {:favourite_counts 200})
                             :content-type :json
                             :throw-exceptions? false})
           body (cc/parse-string (:body result) true)]
       (is (= (:status result) 200)
           "Response status is 200")
       (is (= (:favourite_counts body)
-             100)
-          "Response contains update value of favourite_counts field."))))
+             200)
+          "Response contains updated value of favourite_counts field."))))
 
 
 (deftest update-restaurant-api-test-with-invalid-values
