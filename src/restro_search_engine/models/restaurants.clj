@@ -177,7 +177,7 @@
 (defn update-record
   [{:keys [es-conn] :as conn} {:keys [id] :as record}]
   (let [existing-document (fetch-restaurant-record conn
-                                                   id)
+                                                   record)
         updated-doc (merge existing-document
                            (dissoc record
                                    :id))

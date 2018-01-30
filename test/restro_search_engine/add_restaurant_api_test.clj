@@ -1,4 +1,4 @@
-(ns restro-search-engine.index-doc-api-test
+(ns restro-search-engine.add-restaurant-api-test
   (:require  [clojure.test :refer :all]
              [cheshire.core :as cc]
              [clj-http.client :as http]

@@ -1,4 +1,4 @@
-(ns restro-search-engine.get-doc-api-test
+(ns restro-search-engine.edit-restaurant-api-test
   (:require  [clojure.test :refer :all]
              [cheshire.core :as cc]
              [clj-http.client :as http]
@@ -82,20 +82,46 @@
 (use-fixtures :each each-fixture)
 
 
-(deftest fetch-document-for-given-doc-id
-  (testing "Get Document given a doc id"
-    (let [result (http/get (str @service-url "/restaurants/" @doc-id))
+(deftest update-restaurant-api-test
+  (testing "Update Restaurant API test"
+    (let [result (http/put (str @service-url "/restaurants/" @doc-id)
+                           {:body (cc/generate-string {:favourite_counts 100})
+                            :content-type :json
+                            :throw-exceptions? false})
           body (cc/parse-string (:body result) true)]
       (is (= (:status result) 200)
-          "Response status is 200.")
-      (is (= sample-doc body)
-          "Response contains created document with doc id."))))
+          "Response status is 200")
+      (is (= (:favourite_counts body)
+             100)
+          "Response contains update value of favourite_counts field."))))
 
 
-(deftest fetch-document-with-invalid-id
-  (with-stub [[ctl/log* (fn [& args] (constantly true))]]
-    (testing "Get Document given a doc id"
-      (let [result (http/get (str @service-url "/restaurants/random")
-                             {:throw-exceptions? false})]
+(deftest update-restaurant-api-test-with-invalid-values
+  (testing "Update Restaurant API test with invalid id"
+    (with-stub [[ctl/log* (fn [& args] (constantly true))]]
+      (let [result (http/put (str @service-url "/restaurants/random")
+                             {:body (cc/generate-string {:favourite_counts 100})
+                              :content-type :json
+                              :throw-exceptions? false})
+            body (cc/parse-string (:body result) true)]
         (is (= (:status result) 404)
-            "Response status is 404.")))))
+            "Response status is 404"))))
+  (testing "Update Restaurant API test with invalid values"
+    (with-stub [[ctl/log* (fn [& args] (constantly true))]]
+      (let [result (http/put (str @service-url "/restaurants/" @doc-id)
+                             {:body (cc/generate-string {:email "invalidemail"
+                                                         :location "invalidlocation"
+                                                         :ratings [100]})
+                              :content-type :json
+                              :throw-exceptions? false})
+            body (cc/parse-string (:body result) true)]
+        (is (= (:status result) 400)
+            "Response status is 400")
+        (is (= (:invalid-fields body)
+               ["email" "ratings" "location"])
+            "Response contains invalid-fields with email, location, ratings fields."))))
+  (testing "Update Restaurant API test with empty body"
+    (let [result (http/put (str @service-url "/restaurants/" @doc-id))
+          body (cc/parse-string (:body result) true)]
+      (is (= (:status result) 200)
+          "Response status is 200"))))
