@@ -15,7 +15,8 @@
                  [org.clojure/tools.logging "0.4.0"]
                  [ring/ring-json "0.4.0"]
                  [slingshot "0.10.3"]
-                 [prismatic/schema "1.1.7"]]
+                 [prismatic/schema "1.1.7"]
+                 [circleci/bond "0.3.0"]]
   :source-paths ["src"]
   :global-vars {*warn-on-reflection* true}
   :manifest {"Project-Name" ~#(:name %)
