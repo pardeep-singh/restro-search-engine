@@ -61,7 +61,7 @@
                                                   (assoc sample-restaurant-data
                                                          :title "Keventers")))))
     (ceri/refresh (:es-conn (:elasticsearch system)))
-    (Thread/sleep 1000)
+    (Thread/sleep 5000)
     (reset! index-name random-index-name)
     (reset! service-port random-service-port)
     (reset! server-system system)
