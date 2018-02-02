@@ -14,11 +14,6 @@
 (defonce ^{:doc "Index type mapping used in restaurants index."}
   index-type "default")
 
-(defonce index-settings
-  {:index {:number_of_replicas 1
-           :number_of_shards 1
-           :refresh_interval "5s"}})
-
 (defonce ^{:doc "Restaurants Index Mappings and settings"}
   index-settings-mappings {:settings {:number_of_replicas 1
                                       :number_of_shards 1

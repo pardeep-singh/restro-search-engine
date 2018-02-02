@@ -25,7 +25,7 @@
   (let [uri (str (:uri es-conn) "/" index-name)
         result (http/put uri
                          (merge (:http-opts es-conn)
-                                {:body (cheshire.core/generate-string index-configs)
+                                {:body (cc/generate-string index-configs)
                                  :accept :json}))]
     result))
 

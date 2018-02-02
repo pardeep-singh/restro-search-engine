@@ -12,7 +12,9 @@
             [restro-search-engine.util.http :as ruh]
             [restro-search-engine.handlers.apis :as rha]
             [restro-search-engine.middleware :as rm]
-            [restro-search-engine.util.util :as ruu]))
+            [restro-search-engine.util.util :as ruu]
+            [clojurewerkz.elastisch.rest.index :as ceri]
+            [restro-search-engine.models.restaurants :as rmr]))
 
 
 (defonce ^{:doc "Server system representing HTTP server."}
@@ -95,6 +97,12 @@
     (let [configs (ruu/read-configs)
           system (construct-system configs)]
       (start-system system)
+      (when-not (ceri/exists? (get-in server-system [:elasticsearch :es-conn])
+                              rmr/index-name)
+        (ctl/info (format "Creating Index: %s" rmr/index-name))
+        (ruu/create-index* (:elasticsearch server-system)
+                           rmr/index-name
+                           rmr/index-settings-mappings))
       (.addShutdownHook (Runtime/getRuntime)
                         (Thread. (fn []
                                    (ctl/info "Running Shutdown Hook")
