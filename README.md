@@ -1,4 +1,4 @@
-# restro-search-engine
+# Restaurants Search Engine written in Clojure based on Elasticsearch
 
 REST API based Restaurants Search Engine written in Clojure based on Elasticsearch.
 The API server exposes APIs to create, update, search, suggest documents using elasticsearch.
