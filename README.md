@@ -17,7 +17,7 @@ Update the config file located at <a href="resources/configs.clj"> configs.clj <
 To start a web server for the application, run:
 
 ```
-    lein run
+lein run
 ```
 
 This will start the server on Port 7799. Run below curl command to verify
@@ -40,3 +40,11 @@ Use the curl command mentioned above to verify.
 Export the <a href="/Restaurant-Search-Engine.postman_collection.json">Postman Collection</a> to Postman. This collections
 includes the sample request for all the APIs.
 
+
+### Run tests
+```
+lein test :all
+....
+Ran 18 tests containing 54 assertions.
+0 failures, 0 errors.
+```
